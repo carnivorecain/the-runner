@@ -1,12 +1,5 @@
-from pygame import *
-
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 600
-SCREEN_BORDER = 10
-
-VELOCITY = 3
-FRAMERATE = 40
-
+import pygame
+# from pygame import *
 
 class Runner :
 
@@ -15,19 +8,47 @@ class Runner :
     def __init__(self,x,y,vx,vy):
         self.x = x
         self.y = y
-        self.vx = vx
+        self.vx = vx # remove?
         self.vy = vy
         self.moving = False
 
     def show(self,col):
-        draw.circle(screen,col,(self.x, self.y),self.RADIUS)
+        pygame.draw.circle(screen,col,(self.x, self.y),self.RADIUS)
 
-    
-init() # starts creating
-screen = display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])# creates screen
-screen.fill(Color("black"))# gives screen black color
-runner = Runner(SCREEN_WIDTH-Runner.RADIUS.SCREEN_WIDTH,SCREEN_HEIGHT)
-runner.show(Color("green"))
-display.flip()
+class Map :
 
-    
+    def __init__(self,x,y,width,height,vx):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.vx = vx
+        self.moving = False
+
+    def show(self,col):
+        pygame.draw.rect(screen, col, pygame.Rect(self.x, self.y, self.width, self.height))
+
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+SCREEN_BORDER = 10
+
+VELOCITY = 3
+FRAMERATE = 40
+
+pygame.init() # starts creating
+screen = pygame.display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])# creates screen
+screen.fill(pygame.Color("black"))# gives screen black color
+runner = Runner(int((SCREEN_WIDTH-Runner.RADIUS)/4), int((SCREEN_HEIGHT-Runner.RADIUS)*2/3), 0, 0)
+map = Map(0, int((SCREEN_HEIGHT-Runner.RADIUS)*2/3)+10, SCREEN_WIDTH, 10, 0)
+map.show(pygame.Color("blue"))
+runner.show(pygame.Color("green"))
+done = False
+
+while not done:
+    for event in pygame.event.get():
+    	# add button logic for jumping, etc
+        if event.type == pygame.QUIT:
+            done = True
+        
+        pygame.display.flip()
+
