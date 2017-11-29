@@ -1,0 +1,33 @@
+from pygame import *
+
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+SCREEN_BORDER = 10
+
+VELOCITY = 3
+FRAMERATE = 40
+
+
+class Runner :
+
+    RADIUS = 10 
+
+    def __init__(self,x,y,vx,vy):
+        self.x = x
+        self.y = y
+        self.vx = vx
+        self.vy = vy
+        self.moving = False
+
+    def show(self,col):
+        draw.circle(screen,col,(self.x, self.y),self.RADIUS)
+
+    
+init() # starts creating
+screen = display.set_mode([SCREEN_WIDTH, SCREEN_HEIGHT])# creates screen
+screen.fill(Color("black"))# gives screen black color
+runner = Runner(SCREEN_WIDTH-Runner.RADIUS.SCREEN_WIDTH,SCREEN_HEIGHT)
+runner.show(Color("green"))
+display.flip()
+
+    
