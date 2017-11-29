@@ -1,0 +1,92 @@
+import sys
+import random
+import pygame
+from pygame import *
+
+
+pygame.init()
+fpsClock = pygame.time.Clock()
+
+windowSurfaceObject = pygame.display.set_mode((640480))
+pygame.display.set_caption('THAT WHAT RUNS DOES NOT FALL')
+
+black =  pygame.Color(1,1,1)
+white = pygame.Color (255,255,255)
+
+
+class Map:
+
+    def __init__() :
+       # loading the runner
+       # possibly the laoding of obsticales here with the randomizer
+        pass
+
+    def loadObsticale():
+        pass
+
+    def loadRunner(): # this may occur in the init
+       # with speific positon
+
+    def loadMenu ():
+        #when user pushes p causes pause menu
+
+    def mapspeed (self, direction):
+        #self.moving = True # SAYING THAT THE MAP IS SELF MOVING
+       # in direction == left
+        #    self.xVel = 5
+
+class Obsticale():
+
+    def __init__(self, position size):
+        return
+
+    def size ():
+       # width =
+      #  height =
+
+class Runner():
+
+    def __init__(self,direction):
+       # self.width = 20
+       # self.height =40
+       # self.x = 290 - self.width/2
+       # self.y = 200 - self.height/2
+       # self.moving = mapspeed
+
+       # for direction == mapspeed.direction
+       # for Runnerspeed = mapspeed
+
+    def runnnerSpeed ():
+       # runnerspeed = mapspeed
+        return
+
+    def Jumpmechanic(self,direction):
+       # self.moving = True
+       # if direction == "up" :
+        #    self.yVel == -5
+        
+        return
+
+    def Collisons():
+        #Game over statement
+
+class Menu():
+
+    def __init__():
+       # position
+        
+
+    def loadMenu:
+        #shows pannel with 2 functions
+       # def resumegame():
+       #     click and resume game
+       # def quitgame():
+       #     click and quit
+        
+
+player = Runner
+
+while True:
+    windowSurfaceObject.fill(black)
+    
+
