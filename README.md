@@ -25,7 +25,7 @@ Christine
 
 SOUND & MUSIC
 
-Music by: 
+Music: 
 "Mortal Machine" by Intracate / Newgrounds Audio Portal / Attribution-ShareAlike 3.0 Unported
 https://www.newgrounds.com/audio/listen/735541
 
