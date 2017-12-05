@@ -23,10 +23,28 @@ screen = pygame.display.set_mode((WIDTH,HEIGHT))
 pygame.display.set_caption('THAT WHICH RUNS DOES NOT FALL')
 
 clock = pygame.time.Clock()
-tick = clock.tick(60) # this doesn't anything here, try it in the game loop
+#tick = clock.tick(60) # this doesn't anything here, try it in the game loop
 
 # Helper functions
 ############################################################
+
+class Data():
+    def __init__(self):
+        pass
+    
+    Buildings = []
+
+    Y_Change = 0
+    time = 0
+    Initial_Velocity = 0
+    Jump_Velocity = 50
+    
+    T = 0
+    Metres = 0
+    Building_Speed = 600
+    Gravity = -150
+
+    MaxBuildingHeightDifference = 200
 
 def rotate(lst):
     lst[:] = lst[1:] + [lst[0]]
@@ -54,25 +72,10 @@ class Random():
         return random.randint(8,15)*40
 
     def Gap():
-       return random.randint(4,8)*20
+       return random.randint(10,20)*5
 
     def YPos():
         return random.randint(20,55)*10
-
-class Data():
-    def __init__(self):
-        pass
-
-    Buildings = []
-
-    Y_Change = 0
-    time = 0
-    Initial_Velocity = 0
-    
-    T = 0
-    Metres = 0
-    Building_Speed = 15
-    Gravity = -2
 
 # Visible Objects
 ############################################################
@@ -106,8 +109,6 @@ class Text():
 class Building(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color):
         super().__init__()
-        self.image = getImage('building_left.png')
-        self.rect = pygame.Rect(x, y, height, width)
         self.color = color
         self.gap = Random.Gap()
         self.name = 0
@@ -142,6 +143,7 @@ class Robot(pygame.sprite.Sprite):
         super().__init__()
         self.rect = pygame.Rect(x, y, height, width)
         self.color = color
+        self.velocity = Data.Initial_Velocity
 
         self.images = []
         self.images.append(getImage('sprites/run_1.png'))
@@ -191,6 +193,7 @@ class Robot(pygame.sprite.Sprite):
 
 background = Background('background.png', [0,0])
 
+lastY = 0
 for i in range(0,5):
     startX = 0
     if len(Data.Buildings) > 0:
@@ -198,6 +201,10 @@ for i in range(0,5):
         startX = lastBuilding.rect.x + lastBuilding.rect.width
 
     building = Building(startX + Random.Gap(), Random.YPos(), Random.Width(), 600, BLACK) #creates the Buildings
+    #check building can be jumped to
+    if building.rect.y < lastY - Data.MaxBuildingHeightDifference:
+        building.rect.y = lastY - Data.MaxBuildingHeightDifference
+    lastY = building.rect.y
     building.name = i
     Data.Buildings.append(building)
 
@@ -210,7 +217,7 @@ robot_group = pygame.sprite.Group(robot)
 # calculation functions
 ############################################################
 
-def calcBuildingsPos():
+def calcBuildingsPos(tick):
     # move first building to the back if it has gone offscreen
     firstBuilding = Data.Buildings[0]
     if firstBuilding.rect.x < -firstBuilding.rect.width: 
@@ -221,47 +228,48 @@ def calcBuildingsPos():
     for building in Data.Buildings:
         # print("building " + str(building.name) + " at " + str(building.rect))
         if building == previousBuilding:
-            building.rect.x -= Data.Building_Speed
+            building.rect.x -= Data.Building_Speed * tick / 1000.0
         else:
             building.rect.x = previousBuilding.rect.x + previousBuilding.rect.width + previousBuilding.gap
         previousBuilding = building
 
-def calcRobotPos():
-    Data.T += 1
-    Data.Y_Change = (Data.Initial_Velocity) + (Data.Gravity*Data.T)
-    #print("Data T:" + str(Data.T) + ", y change:" + str(Data.Y_Change))
+def calcRobotPos(tick):
+    Data.T += tick / 1000.0
+    Data.Y_Change = (robot.velocity) + (Data.Gravity*Data.T)
+    # print("Data T:" + str(Data.T) + ", y-change:" + str(Data.Y_Change))
     robot.rect.y -= Data.Y_Change
-    #print("Robot:" + str(robot.rect))
+    # print("Robot:" + str(robot.rect.y))
 
 def checkCollisions():
     for building in Data.Buildings:
         if robot.rect.colliderect(building.rect):
-            print("collision with building " + str(building.name))
+            # print("collision with building " + str(building.name))
             robot.rect.y = building.rect.y-robot.rect.height-1
-            Data.T = 0
-            Data.Initial_Velocity = 0
+            Data.T = 0.0
+            robot.velocity = 0
 
 def frames():
     Data.Metres += 1
     Score = Text(str(Data.Metres) + "m",'freesansbold.ttf',30,750,50,BLACK)  #prints the score on the screen
     Score.Write()
 
-    calcBuildingsPos()
+    tick = clock.tick(60) # gives time since last frame in ms
 
-    calcRobotPos()
+    calcBuildingsPos(tick) # calculate positions using tick to account for processing lag
+
+    calcRobotPos(tick) # same as above
 
     checkCollisions()
 
-    if Data.T==0 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
+    if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
         print("jump")
         playSound("Jump.wav")
-        Data.T = 0
-        Data.Initial_Velocity = 25
+        robot.velocity = Data.Jump_Velocity
     if event.type == pygame.KEYDOWN and event.key == pygame.K_p: #if we need to retreive the robot goes off screen
         print("reset")
         robot.rect = pygame.Rect(20,100,30,30)
-        Data.T = 0
-        Data.Initial_Velocity = 25
+        Data.T = 0.0
+        robot.velocity = Data.Initial_Velocity
          
     screen.fill(BLACK)
     screen.blit(background.image, background.rect)
@@ -270,8 +278,8 @@ def frames():
     robot_group.draw(screen)
     building_group.update()
     building_group.draw(screen)
-    for building in Data.Buildings:
-        building.ShowCrashRect()
+    # for building in Data.Buildings:
+    #     building.ShowCrashRect()
             
     pygame.display.flip()
 
