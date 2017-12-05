@@ -62,30 +62,12 @@ class Random():
 class Data():
     def __init__(self):
         pass
-    
+
     Buildings = []
-    Build_A_XPos = 0
-    Build_A_Height = 600
-    Build_A_YPos= Random.YPos()
-    Build_A_Width = Random.Width()
-
-    Build_B_XPos = Build_A_XPos + Build_A_Width + Random.Gap()
-    Build_B_Height = 600
-    Build_B_YPos = Random.YPos()
-    Build_B_Width = Random.Width()
-
-    Build_C_XPos = Build_B_XPos + Build_B_Width + Random.Gap()
-    Build_C_Height = 600
-    Build_C_YPos = Random.YPos()
-    Build_C_Width = Random.Width()
 
     Y_Change = 0
     time = 0
     Initial_Velocity = 0
-    Robot_YPos = 100 #HEIGHT - Original_Height_A - YLoc
-    Robot_XPos = 20
-    Robot_Width = 30
-    Robot_Height = 30
     
     T = 0
     Metres = 0
@@ -166,6 +148,16 @@ class Robot(pygame.sprite.Sprite):
         self.images.append(getImage('sprites/run_2.png'))
         self.images.append(getImage('sprites/run_3.png'))
         self.images.append(getImage('sprites/run_2.png'))
+
+        self.jumpImages = []
+        self.jumpImages.append(getImage('sprites/jump_1.png'))
+        self.jumpImages.append(getImage('sprites/jump_2.png'))
+        self.jumpImages.append(getImage('sprites/jump_3.png'))
+        self.jumpImages.append(getImage('sprites/jump_4.png'))
+        self.jumpImages.append(getImage('sprites/jump_5.png'))
+        self.jumpImages.append(getImage('sprites/jump_6.png'))
+        self.jumpImages.append(getImage('sprites/jump_7.png'))
+        self.jumpImages.append(getImage('sprites/jump_8.png'))
         
         self.index = 0
         self.image = self.images[self.index]
@@ -175,12 +167,17 @@ class Robot(pygame.sprite.Sprite):
         displays the next one each tick. For a slower animation, you may want to 
         consider using a timer of some sort so it updates slower.'''
 
+        imageList = self.images
+        if Data.Initial_Velocity > 0 :
+            imageList = self.jumpImages
+            
+        
         imageTicks = 5 # number of loops each animation frame shows for
         self.index += 1
-        if self.index >= len(self.images)*imageTicks:
+        if self.index >= len(imageList)*imageTicks:
             self.index = 0
         imageCount = int(self.index/imageTicks)
-        self.image = self.images[imageCount]
+        self.image = imageList[imageCount]
 
         if self.rect.width < self.image.get_rect().width:
             self.image = pygame.transform.scale(self.image, (self.rect.width, self.rect.height))
@@ -232,9 +229,9 @@ def calcBuildingsPos():
 def calcRobotPos():
     Data.T += 1
     Data.Y_Change = (Data.Initial_Velocity) + (Data.Gravity*Data.T)
-    print("Data T:" + str(Data.T) + ", y change:" + str(Data.Y_Change))
+    #print("Data T:" + str(Data.T) + ", y change:" + str(Data.Y_Change))
     robot.rect.y -= Data.Y_Change
-    print("Robot:" + str(robot.rect))
+    #print("Robot:" + str(robot.rect))
 
 def checkCollisions():
     for building in Data.Buildings:
