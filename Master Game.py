@@ -254,6 +254,7 @@ def frames():
 
     if Data.T==0 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
         print("jump")
+        playSound("Jump.wav")
         Data.T = 0
         Data.Initial_Velocity = 25
     if event.type == pygame.KEYDOWN and event.key == pygame.K_p: #if we need to retreive the robot goes off screen
