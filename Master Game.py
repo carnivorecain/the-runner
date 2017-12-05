@@ -37,12 +37,12 @@ class Data():
     Y_Change = 0
     time = 0
     Initial_Velocity = 0
-    Jump_Velocity = 50
+    Jump_Velocity = 25
     
     T = 0
     Metres = 0
     Building_Speed = 600
-    Gravity = -150
+    Gravity = -75
 
     MaxBuildingHeightDifference = 200
 
@@ -61,9 +61,13 @@ def getImage(path):
     return image
 
 def playSound(filename):
+    soundObj = pygame.mixer.Sound(filename)
+    soundObj.play()
+
+def playMusic(filename):
     pygame.mixer.music.load(filename)
     pygame.mixer.music.play()
-
+    
 class Random():
     def Height():
         return random.randint(1,6)*50
@@ -170,9 +174,9 @@ class Robot(pygame.sprite.Sprite):
         consider using a timer of some sort so it updates slower.'''
 
         imageList = self.images
-        if Data.Initial_Velocity > 0 :
+        if self.velocity > 0 :
             imageList = self.jumpImages
-            
+            # when you jump, you need to reset the index to 0
         
         imageTicks = 5 # number of loops each animation frame shows for
         self.index += 1
@@ -192,6 +196,7 @@ class Robot(pygame.sprite.Sprite):
 # TODO: make into a function to facilitate restart
 
 background = Background('background.png', [0,0])
+playMusic("MortalMachine.mp3")
 
 lastY = 0
 for i in range(0,5):
@@ -261,7 +266,7 @@ def frames():
 
     checkCollisions()
 
-    if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
+    if Data.T < 0.0001 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
         print("jump")
         playSound("Jump.wav")
         robot.velocity = Data.Jump_Velocity
