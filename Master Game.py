@@ -124,7 +124,7 @@ class Text():
 class Building(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color):
         super().__init__()
-        self.image = getImage('tile.png')
+        self.image = getImage('building_left.png')
         self.rect = pygame.Rect(x, y, height, width)
         self.color = color
         self.gap = Random.Gap()
