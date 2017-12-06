@@ -190,7 +190,8 @@ def showGameOver():
     print("GAME OVER")
     Data.currentScreen = 2
     Data.isGameOver = True
-                               
+                          
+# game loop lives in here, along with setup code
 def startGame():
 
     # calculation functions
@@ -316,8 +317,17 @@ def startGame():
 playMusic("MortalMachine.ogg")
 
 running = True
-
+# 
 flicker = 0.0
+
+#############################################################################################################
+#############################################################################################################
+#############################################################################################################
+#                                           START HERE                                                      #
+#############################################################################################################
+#############################################################################################################
+#############################################################################################################
+#outer game loop: shows start and game over screens; accepts 'start game' and 'quit' keys
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
@@ -325,10 +335,11 @@ while running:
         if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_r) :
             Data.isGameOver = False
             startGame()
-            # Data.currentScreen = 1
 
+    # when you aren't in the game, this display code runs based off the currentScreen variable
     if Data.currentScreen == 0:
-        flicker += clock.tick(60) # gives time since last frame in ms
+         # flicker counts every other second to swap backgrounds, making the 'press space' text flash
+        flicker += clock.tick(60)
         backgroundImage = 'Start_1.png'
         if flicker > 1000:
             backgroundImage = 'Start_2.png'
@@ -345,6 +356,4 @@ while running:
         gameover.Write()
         pygame.display.flip()
 
-pygame.quit()
-
-# gameover = Text("Game Over. Q to quit R to restart",'freesansbold.ttf',30,400,300,BLACK)
+pygame.quit() #probably unneccesary, as the game will close when it hits the end of file
