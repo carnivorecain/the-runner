@@ -42,7 +42,7 @@ class Data():
     Gravity = -75
     Highscore = 0 
 
-    MaxBuildingHeightDifference = 200
+    MaxBuildingHeightDifference = 150
 #KEY FUNCTIONS
     ############################################################
 def rotate(lst): # rotates the buildings via a list
