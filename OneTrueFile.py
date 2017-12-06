@@ -361,6 +361,7 @@ while running:
         if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_r) :
             Data.isGameOver = False
             resetVariables()
+            clock.tick(60) # resets clock after restart
             runGame()
             
             # Data.currentScreen = 1
