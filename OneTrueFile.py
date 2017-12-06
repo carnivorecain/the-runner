@@ -77,9 +77,12 @@ class Random(): # randomixer for building proportions
     def Gap():
        return random.randint(10,20)*5
 
-    def YPos():
-        return random.randint(20,55)*10
-
+    def YPos(MaxHeight):
+        newPos = random.randint(20,55)*10
+        if newPos < MaxHeight:
+            newPos = MaxHeight
+        return newPos
+            
 # Visible Objects
 ############################################################
 
@@ -112,24 +115,27 @@ class Text():
 
 class Building(pygame.sprite.Sprite): # Class for building
     def __init__(self, x, y, width, height, color):
-        super().__init__()# calling sprite init
+        super().__init__() # calling sprite init
+        self.rect = pygame.Rect(x, y, width, height)
         self.color = color
         self.gap = Random.Gap() # assigns random gap size
+        self.tileWidth = 40
+        self.name = 0
+        self.setup(x, y, width, height)
 
-        self.name = 0 # the point of this? it does no change when commeted out although may not make a list properly  
-
-        self.tileStart = 0 # placement of start of tile?
-        self.tileWidth = 40 #width of tile what precisly is a tile?
-        #if width > self.tileWidth:
-        self.image = pygame.Surface([width, height]) # christine found a stack overflow page for this 
-        while self.tileStart < width:
-            if self.tileStart == 0:
-                self.image.blit(getImage('building_left.png'), (self.tileStart, 0))
-            elif self.tileStart > width - self.tileWidth - 1:
-                self.image.blit(getImage('building_right.png'), (self.tileStart, 0))
+    def setup(self, x, y, width, height):
+        tileStart = 0
+        tileWidth = self.tileWidth
+        #if width > tileWidth:
+        self.image = pygame.Surface([width, height])
+        while tileStart < width:
+            if tileStart == 0:
+                self.image.blit(getImage('building_left.png'), (tileStart, 0))
+            elif tileStart > width - tileWidth - 1:
+                self.image.blit(getImage('building_right.png'), (tileStart, 0))
             else:
-                self.image.blit(getImage('building_center.png'), (self.tileStart, 0))
-            self.tileStart += self.tileWidth
+                self.image.blit(getImage('building_center.png'), (tileStart, 0))
+            tileStart += tileWidth
 
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -137,14 +143,15 @@ class Building(pygame.sprite.Sprite): # Class for building
     
     def CrashRect(self): # rectangle for collisions 
         return pygame.Rect(self.rect.x, self.rect.y, 10 ,self.rect.height)
-    
+
+    # debug visualisation
     # def ShowCrashRect(self):
     #     pygame.draw.rect(screen,BLACK,self.CrashRect())
 
 class Robot(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, color): # standard construction of robot 
+    def __init__(self, x, y, height, width, color): # standard construction of robot 
         super().__init__()
-        self.rect = pygame.Rect(x, y, height, width)
+        self.rect = pygame.Rect(x, y, width, height)
         self.color = color
         self.Initial_Velocity = 0.0 
 
@@ -217,13 +224,14 @@ def runGame():
     def calcBuildingsPos(tick):
         # move first building to the back if it has gone offscreen
         firstBuilding = Data.Buildings[0]
-        if firstBuilding.rect.x < -firstBuilding.rect.width: 
+        if firstBuilding.rect.x < -firstBuilding.rect.width:
+            maxHeight = Data.Buildings[0].rect.y - Data.MaxBuildingHeightDifference
+            firstBuilding.setup(800, Random.YPos(maxHeight), Random.Width(), 600)
             firstBuilding.gap = Random.Gap()
             rotate(Data.Buildings)  #moves rects to the back of the queue
 
         previousBuilding = Data.Buildings[0]
         for building in Data.Buildings:
-            # print("building " + str(building.name) + " at " + str(building.rect))
             if building == previousBuilding:
                 building.rect.x -= Data.Building_Speed * tick / 1000.0
             else:
@@ -273,10 +281,8 @@ def runGame():
         startX = lastBuilding.rect.x + lastBuilding.rect.width + Random.Gap() #new X position is where last building starts 
 
 
-        building = Building(startX + Random.Gap(), Random.YPos(), Random.Width(), 600, BLACK) #creates the Buildings
+        building = Building(startX + Random.Gap(), Random.YPos(lastY - Data.MaxBuildingHeightDifference), Random.Width(), 600, BLACK) #creates the Buildings
         #check if building can be jumped to
-        if building.rect.y < lastY - Data.MaxBuildingHeightDifference:
-            building.rect.y = lastY - Data.MaxBuildingHeightDifference
         lastY = building.rect.y
         building.name = i
         Data.Buildings.append(building)
