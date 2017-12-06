@@ -1,4 +1,3 @@
-
 import pygame
 import math
 import random
@@ -33,6 +32,9 @@ class Data():
     pause = False
 
     Buildings = []
+    explosion_group = pygame.sprite.Group()
+    robotRect = pygame.Rect(0,0,0,0)
+    
     robotYOrgin = 0 # JASON HERE 
     Y_Change = 0
     time = 0
@@ -116,10 +118,9 @@ class Text():
 
 
 class Building(pygame.sprite.Sprite): # Class for building
-    def __init__(self, x, y, width, height, color):
+    def __init__(self, x, y, width, height):
         super().__init__() # calling sprite init
         self.rect = pygame.Rect(x, y, width, height)
-        self.color = color
         self.gap = Random.Gap() # assigns random gap size
         self.tileWidth = 40
         self.name = 0
@@ -151,10 +152,9 @@ class Building(pygame.sprite.Sprite): # Class for building
     #     pygame.draw.rect(screen,BLACK,self.CrashRect())
 
 class Robot(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, color): # standard construction of robot 
+    def __init__(self, x, y, width, height): # standard construction of robot 
         super().__init__()
         self.rect = pygame.Rect(x, y, width, height)
-        self.color = color
         self.Initial_Velocity = 0.0 
 
         self.runImages = [] # list for the running animation 
@@ -172,7 +172,7 @@ class Robot(pygame.sprite.Sprite):
         self.jumpImages.append(getImage('jump_6.png'))
         self.jumpImages.append(getImage('jump_7.png'))
         self.jumpImages.append(getImage('jump_8.png'))
-        
+
         self.index = 0
         self.image = self.runImages[self.index]
 
@@ -198,8 +198,44 @@ class Robot(pygame.sprite.Sprite):
 
         if self.rect.y>= 600:# this checks for falling game over
             print("robot has fallen down")
-            showGameOver()            
+            showGameOver()
 
+class Explosion(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height): # standard construction of robot 
+        super().__init__()
+        
+        self.deathImages = [] # list for the explosion animation
+        self.deathImages.append(getImage('explosion_1.png'))
+        self.deathImages.append(getImage('explosion_2.png'))
+        self.deathImages.append(getImage('explosion_3.png'))
+        self.deathImages.append(getImage('explosion_4.png'))
+        self.deathImages.append(getImage('explosion_5.png'))
+        self.deathImages.append(getImage('explosion_6.png'))
+        self.deathImages.append(getImage('explosion_7.png'))
+        
+        self.index = 0
+        self.image = self.deathImages[self.index]
+
+        self.rect = self.image.get_rect()
+        self.rect.x = x - self.rect.width/2 + 20
+        self.rect.y = y - self.rect.height/2
+
+    def update(self):
+        print("updating boom at " + str(self.rect))
+        imageList = self.deathImages
+        imageTicks = 3 # number of loops each animation frame shows for
+        self.index += 1
+        if self.index >= len(imageList)*imageTicks:
+            self.index = 0
+        imageCount = int(self.index/imageTicks)
+        self.image = imageList[imageCount]       
+
+def showExplosion():
+    #add sound effect
+    if len(Data.explosion_group) < 1:
+        explosion = Explosion(Data.robotRect.x, Data.robotRect.y, Data.robotRect.width, Data.robotRect.height)
+        Data.explosion_group = pygame.sprite.Group(explosion)
+    
 def showGameOver(): # sprites for death and stops map
     # stop map
     # death animation sequence
@@ -212,6 +248,7 @@ def resetVariables():# no touch
     Data.Building_Speed = 600
     Data.Metres = 0
     Data.robotYOrign = 0 # dont touch
+    Data.explosion_group.empty()
 
 def showPause():
     
@@ -269,6 +306,7 @@ def runGame():
                     # death animation must delete robot
                     #and also run showgameover then does the gameover
                 #showGameOver()
+                showExplosion()
             elif robot.rect.colliderect(building.rect) and robot.rect.y:
                 print("collision with building " + str(building.name))
                 Data.robotYOrgin = robot.rect.y ########################
@@ -283,6 +321,7 @@ def runGame():
         Data.Y_Change = (robot.Initial_Velocity) + (Data.Gravity*Data.T)
         # print("Data T:" + str(Data.T) + ", y-change:" + str(Data.Y_Change))
         robot.rect.y -= Data.Y_Change
+        Data.robotRect = robot.rect
         # print("Robot:" + str(robot.rect.y))
 
 
@@ -294,7 +333,7 @@ def runGame():
     ############################################################
     background = Background('background.png', [0,0])
 
-    building = Building(0, 400, 1520, 600, BLACK) #hardcode first building with runway width
+    building = Building(0, 400, 1520, 600) #hardcode first building with runway width
     Data.Buildings.append(building)        
     lastY = building.rect.y #for calculating if building height is too high to jump
     for i in range(0,4):
@@ -302,7 +341,7 @@ def runGame():
         startX = lastBuilding.rect.x + lastBuilding.rect.width + Random.Gap() #new X position is where last building starts 
 
 
-        building = Building(startX + Random.Gap(), Random.YPos(lastY - Data.MaxBuildingHeightDifference), Random.Width(), 600, BLACK) #creates the Buildings
+        building = Building(startX + Random.Gap(), Random.YPos(lastY - Data.MaxBuildingHeightDifference), Random.Width(), 600) #creates the Buildings
         #check if building can be jumped to
         lastY = building.rect.y
         building.name = i
@@ -311,8 +350,8 @@ def runGame():
     building_group = pygame.sprite.Group(Data.Buildings)
 
 
-    #robot = Robot(5,0,60,60,BLUE)
-    robot = Robot(5, lastBuilding.rect.y-60,60,60,BLUE)
+    #robot = Robot(5,0,60,60)
+    robot = Robot(5, lastBuilding.rect.y-60,60,60)
 
     robot_group = pygame.sprite.Group(robot)
     clock.tick(60) # resets clock after restart
@@ -354,6 +393,8 @@ def runGame():
         building_group.draw(screen)
         robot_group.update()
         robot_group.draw(screen)
+        Data.explosion_group.update()
+        Data.explosion_group.draw(screen)
         
         Data.Metres += 1 # score section
         if Data.Highscore < Data.Metres :
