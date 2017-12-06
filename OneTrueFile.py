@@ -42,7 +42,7 @@ class Data():
     Gravity = -75
     Highscore = 0 
 
-    MaxBuildingHeightDifference = 150
+    MaxBuildingHeightDifference = 100
 #KEY FUNCTIONS
     ############################################################
 def rotate(lst): # rotates the buildings via a list
@@ -209,9 +209,8 @@ def resetVariables():# no touch
     running = True
     Data.Building_Speed = 600
     Data.Metres = 0
-    Data.robotYOrign = 0 # dont touch 
-
-    
+    Data.robotYOrign = 0 # dont touch
+  
                                
 def runGame():
     #resetVariables() not needed here it is in the reset loop 
@@ -294,6 +293,7 @@ def runGame():
     robot = Robot(5, lastBuilding.rect.y-60,60,60,BLUE)
 
     robot_group = pygame.sprite.Group(robot)
+    clock.tick(60) # resets clock after restart
 
     while not Data.isGameOver:
         print("inside loop")
@@ -361,7 +361,6 @@ while running:
         if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_r) :
             Data.isGameOver = False
             resetVariables()
-            clock.tick(60) # resets clock after restart
             runGame()
             
             # Data.currentScreen = 1
