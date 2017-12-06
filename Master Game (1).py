@@ -1,4 +1,3 @@
-
 import pygame
 import math
 import random
@@ -25,13 +24,13 @@ pygame.display.set_caption('THAT WHICH RUNS DOES NOT FALL')
 clock = pygame.time.Clock()
 tick = clock.tick(60) # this doesn't anything here, try it in the game loop
 
-# Helper functions
+# Key Functions
 ############################################################
 
-def rotate(lst):
+def rotate(lst): # rotates the buildings in a list
     lst[:] = lst[1:] + [lst[0]]
 
-def getImage(path):
+def getImage(path): # what does this do ? seems pointless? 
     image = pygame.image.load(path)
     return image
     global _image_library
@@ -42,11 +41,11 @@ def getImage(path):
             _image_library[path] = image
     return image
 
-def playSound(filename):
+def playSound(filename): # plays sound 
     pygame.mixer.music.load(filename)
     pygame.mixer.music.play()
 
-class Random():
+class Random(): # random building height width etc generator 
     def Height():
         return random.randint(1,6)*50
 
@@ -59,7 +58,7 @@ class Random():
     def YPos():
         return random.randint(20,55)*10
 
-class Data():
+class Data(): # global variables? do we need? in a class can we no create when used?
     def __init__(self):
         pass
     
@@ -89,53 +88,55 @@ class Data():
     
     T = 0
     Metres = 0
-    Building_Speed = 15
+    Building_Speed = 10
     Gravity = -2
 
 # Visible Objects
 ############################################################
 
-class Background(pygame.sprite.Sprite):
+class Background(pygame.sprite.Sprite): # Background image class
     def __init__(self, image_file, location):
         pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
         self.image = pygame.image.load(image_file)
         self.rect = self.image.get_rect()
-        self.rect.left, self.rect.top = location
+        self.rect.left, self.rect.top = location # ?? this line?
 
 class Text():
     def __init__(self, text, fnt, size, xcoord, ycoord,color):
         self.text = text
-        self.fnt = fnt
+        self.fnt = fnt # font?
         self.size = size
         self.xcoord = xcoord
         self.ycoord = ycoord
         self.color = color
-    def text_objects(self,font):
+        
+    def text_objects(self,font): # this is?
         textSurface = font.render(self.text, True, self.color)
         return textSurface, textSurface.get_rect()
     
-    def Write(self):
+    def Write(self): # assumibily the write funtion for text 1 is there not already
+        #               one and 2 what are these attributes
         Texty = pygame.font.Font(self.fnt,self.size)
         TextSurf, TextRect = self.text_objects(Texty)
         TextRect.topright = ((self.xcoord,self.ycoord))
         screen.blit(TextSurf,TextRect)
 
 
-class Building(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, color):
+class Building(pygame.sprite.Sprite): # buidling class
+    def __init__(self, x, y, width, height, color):# constructor
         super().__init__()
-        self.image = getImage('building_left.png')
-        self.rect = pygame.Rect(x, y, height, width)
-        self.color = color
-        self.gap = Random.Gap()
-        self.name = 0
+        self.image = getImage('building_left.png') # linking to image
+        self.rect = pygame.Rect(x, y, height, width) # making it a rect
+        self.color = color # color
+        self.gap = Random.Gap()# gap from last building
+        self.name = 0 #? point of this
 
-        self.tileStart = 0
-        tileWidth = 40
+        self.tileStart = 0 # location of start?
+        tileWidth = 40 # size of tiles
         if width <= tileWidth:
             self.image = pygame.transform.scale(self.image, (w, height))
-        elif width > tileWidth:
-            self.image = pygame.Surface([width, height])
+        elif width > tileWidth: # with an explainatoin of what tiles are makes sense
+            self.image = pygame.Surface([width, height])# however we need to show where we learnt this
             while self.tileStart < width:
                 if self.tileStart == 0:
                     self.image.blit(getImage('building_left.png'), (self.tileStart, 0))
@@ -145,34 +146,34 @@ class Building(pygame.sprite.Sprite):
                     self.image.blit(getImage('building_center.png'), (self.tileStart, 0))
                 self.tileStart += tileWidth
 
-        self.rect = self.image.get_rect()
-        self.rect.x = x
+        self.rect = self.image.get_rect() # possition of the building?
+        self.rect.x = x 
         self.rect.y = y
     
-    def CrashRect(self):
-        return pygame.Rect(self.rect.x, self.rect.y, 10 ,self.rect.height)
+    def CrashRect(self): # crash rectangle for wall game over 
+        return pygame.Rect(self.rect.x, self.rect.y, 2 ,self.rect.height)
     
-    def ShowCrashRect(self):
+    def ShowCrashRect(self): # need to make this invisible
         pygame.draw.rect(screen,BLACK,self.CrashRect())
 
  
 
     
 
-class Robot(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height, color):
+class Robot(pygame.sprite.Sprite): # robot class
+    def __init__(self, x, y, width, height, color): # constructor
         super().__init__()
-        self.rect = pygame.Rect(x, y, height, width)
+        self.rect = pygame.Rect(x, y, height, width) # roborect sizw
         self.color = color
 
-        self.images = []
+        self.images = [] # sprites in a list to animate
         self.images.append(getImage('sprites/run_1.png'))
         self.images.append(getImage('sprites/run_2.png'))
         self.images.append(getImage('sprites/run_3.png'))
         self.images.append(getImage('sprites/run_2.png'))
         
-        self.index = 0
-        self.image = self.images[self.index]
+        self.index = 0 # list index 
+        self.image = self.images[self.index] # how we animate 
 
     def update(self):
         '''This method iterates through the elements inside self.images and 
@@ -180,16 +181,16 @@ class Robot(pygame.sprite.Sprite):
         consider using a timer of some sort so it updates slower.'''
 
         imageTicks = 5 # number of loops each animation frame shows for
-        self.index += 1
-        if self.index >= len(self.images)*imageTicks:
+        self.index += 1 # +1 to index
+        if self.index >= len(self.images)*imageTicks: # why * imageticks?
             self.index = 0
         imageCount = int(self.index/imageTicks)
-        self.image = self.images[imageCount]
+        self.image = self.images[imageCount]#???
 
-        if self.rect.width < self.image.get_rect().width:
+        if self.rect.width < self.image.get_rect().width:# scaling but is it needed?
             self.image = pygame.transform.scale(self.image, (self.rect.width, self.rect.height))
 
-
+"""
     def find_collisions (self, rect):
         self.collision[0] = rect.collidepoint(self.rect.bottomleft)
         self.collision[1] = rect.collidepoint(self.rect.bottomright)
@@ -216,8 +217,8 @@ class Robot(pygame.sprite.Sprite):
                 pygame.quit()
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_R:
                     frames()
-            
-    # Object creation
+"""           
+    # Object creation - put into 1 function??
 ############################################################
 
 # TODO: make into a function to facilitate restart
@@ -230,15 +231,16 @@ for i in range(0,5):
         lastBuilding = Data.Buildings[-1]        
         startX = lastBuilding.rect.x + lastBuilding.rect.width
 
-    building = Building(startX + Random.Gap(), Random.YPos(), Random.Width(), 600, BLACK) #creates the Buildings
+    building = Building(startX + Random.Gap(), Random.YPos(), Random.Width(),
+                        600, BLACK) #creates the Buildings
     building.name = i
     Data.Buildings.append(building)
 
-building_group = pygame.sprite.Group(Data.Buildings)
+building_group = pygame.sprite.Group(Data.Buildings)# this makes the building list a group of sprites
 
 
-robot = Robot(20,100,60,60,BLUE)
-robot_group = pygame.sprite.Group(robot)
+robot = Robot(20,100,60,60,BLUE) # make robo
+robot_group = pygame.sprite.Group(robot) # make the sprite group for robo
 
 # calculation functions
 ############################################################
@@ -246,7 +248,7 @@ robot_group = pygame.sprite.Group(robot)
 def calcBuildingsPos():
     # move first building to the back if it has gone offscreen
     firstBuilding = Data.Buildings[0]
-    if firstBuilding.rect.x < -firstBuilding.rect.width: 
+    if firstBuilding.rect.x < -firstBuilding.rect.width: #??
         firstBuilding.gap = Random.Gap()
         rotate(Data.Buildings)  #moves rects to the back of the queue
 
@@ -266,23 +268,20 @@ def calcRobotPos():
     robot.rect.y -= Data.Y_Change
     #print("Robot:" + str(robot.rect))
 
-
+"""
 def collisions():
  
     for building in Data.Buildings:
         robot.find_collisions(building.rect)
         robot.collision_result(building.rect)
-        
+"""        
 
 
-def collision(): # THIS IS NOT GOOD 
+def collision():  
     for building in Data.Buildings:
 
-        
-
-        if robot.rect.colliderect(building.CrashRect()):        
+        if robot.rect.colliderect(building.CrashRect()): # wall collison end game       
             print("hits wall game over")
-            
             screen.fill(WHITE)
             gameover = Text("Game Over. Q to quit R to restart",'freesansbold.ttf',30,400,300,BLACK)
             gameover.Write()
@@ -290,8 +289,7 @@ def collision(): # THIS IS NOT GOOD
             global crashed
             crashed = True
             
-        
-        elif robot.rect.colliderect(building.rect):
+        elif robot.rect.colliderect(building.rect): # roof collison stand on rect
             print("collision with building " + str(building.name))
             robot.rect.y = building.rect.y-robot.rect.height
             Data.T = 0
@@ -325,23 +323,20 @@ def frames():
 
     
     
-    Data.Metres += 1
+    Data.Metres += 1#??
     Score = Text(str(Data.Metres) + "m",'freesansbold.ttf',30,750,50,BLACK)  #prints the score on the screen
     Score.Write()
-
-    #collisions()
 
     calcBuildingsPos()
 
     calcRobotPos()
     
-
     collision()
-    #gapGameOver()
+    gapGameOver()
     
     
     
-
+# should this be in its own jump function maybe in robot class?
     if Data.T==0 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
         print("jump")
         Data.T = 0
@@ -396,10 +391,12 @@ elif event.type == pygame.KEYDOWN and event.key == pygame.K_R:
 
 
 
-# Side wall collision
-# put in images
+# Side wall collision done
+# put in images done
 # Start screen
 # Death screen
 # Pause screen
 # Restart Function
 # 
+
+Blog
