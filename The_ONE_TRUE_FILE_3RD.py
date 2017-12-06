@@ -24,7 +24,7 @@ pygame.display.set_caption('THAT WHICH RUNS DOES NOT FALL')
 
 clock = pygame.time.Clock()
 
-# Gobal Attributes 
+# Global Attributes 
 ##################################
 
 class Data():
@@ -44,7 +44,7 @@ class Data():
     Gravity = -75
     Highscore = 0 
 
-    MaxBuildingHeightDifference = 200
+    MaxBuildingHeightDifference = 100
 #KEY FUNCTIONS
     ############################################################
 def rotate(lst): # rotates the buildings via a list
@@ -79,9 +79,12 @@ class Random(): # randomixer for building proportions
     def Gap():
        return random.randint(10,20)*5
 
-    def YPos():
-        return random.randint(20,55)*10
-
+    def YPos(MaxHeight):
+        newPos = random.randint(20,55)*10
+        if newPos < MaxHeight:
+            newPos = MaxHeight
+        return newPos
+            
 # Visible Objects
 ############################################################
 
@@ -114,24 +117,27 @@ class Text():
 
 class Building(pygame.sprite.Sprite): # Class for building
     def __init__(self, x, y, width, height, color):
-        super().__init__()# calling sprite init
+        super().__init__() # calling sprite init
+        self.rect = pygame.Rect(x, y, width, height)
         self.color = color
         self.gap = Random.Gap() # assigns random gap size
+        self.tileWidth = 40
+        self.name = 0
+        self.setup(x, y, width, height)
 
-        self.name = 0 # the point of this? it does no change when commeted out although may not make a list properly  
-
-        self.tileStart = 0 # placement of start of tile?
-        self.tileWidth = 40 #width of tile what precisly is a tile?
-        #if width > self.tileWidth:
-        self.image = pygame.Surface([width, height]) # christine found a stack overflow page for this 
-        while self.tileStart < width:
-            if self.tileStart == 0:
-                self.image.blit(getImage('building_left.png'), (self.tileStart, 0))
-            elif self.tileStart > width - self.tileWidth - 1:
-                self.image.blit(getImage('building_right.png'), (self.tileStart, 0))
+    def setup(self, x, y, width, height):
+        tileStart = 0
+        tileWidth = self.tileWidth
+        #if width > tileWidth:
+        self.image = pygame.Surface([width, height])
+        while tileStart < width:
+            if tileStart == 0:
+                self.image.blit(getImage('building_left.png'), (tileStart, 0))
+            elif tileStart > width - tileWidth - 1:
+                self.image.blit(getImage('building_right.png'), (tileStart, 0))
             else:
-                self.image.blit(getImage('building_center.png'), (self.tileStart, 0))
-            self.tileStart += self.tileWidth
+                self.image.blit(getImage('building_center.png'), (tileStart, 0))
+            tileStart += tileWidth
 
         self.rect = self.image.get_rect()
         self.rect.x = x
@@ -139,14 +145,15 @@ class Building(pygame.sprite.Sprite): # Class for building
     
     def CrashRect(self): # rectangle for collisions 
         return pygame.Rect(self.rect.x, self.rect.y, 10 ,self.rect.height)
-    
+
+    # debug visualisation
     # def ShowCrashRect(self):
     #     pygame.draw.rect(screen,BLACK,self.CrashRect())
 
 class Robot(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, color): # standard construction of robot 
         super().__init__()
-        self.rect = pygame.Rect(x, y, height, width)
+        self.rect = pygame.Rect(x, y, width, height)
         self.color = color
         self.Initial_Velocity = 0.0 
 
@@ -226,17 +233,9 @@ def showPause():
                 print("quit from pause loop")
                 pygame.quit()
                 sys.quit()
-    
-#    Data.currentScreen = 3
-    
-
-
-
-    
-                               
+                  
 def runGame():
-    #resetVariables() not needed here it is in the reset loop
-    
+    #resetVariables() not needed here it is in the reset loop 
     
 
     # calculation functions
@@ -245,19 +244,20 @@ def runGame():
 
     def calcBuildingsPos(tick):
         # move first building to the back if it has gone offscreen
-        firstBuilding = Data.Buildings[0]
-        if firstBuilding.rect.x < -firstBuilding.rect.width: 
-            firstBuilding.gap = Random.Gap()
+        firstBuilding = Data.Buildings[0] # retrieves the first building in a list
+        if firstBuilding.rect.x < -firstBuilding.rect.width: #if x position of building is its entire width offscreen...
+            maxHeight = Data.Buildings[0].rect.y - Data.MaxBuildingHeightDifference
+            firstBuilding.setup(800, Random.YPos(maxHeight), Random.Width(), 600)
+            firstBuilding.gap = Random.Gap() # ... set a new random gap
             rotate(Data.Buildings)  #moves rects to the back of the queue
 
-        previousBuilding = Data.Buildings[0]
-        for building in Data.Buildings:
-            # print("building " + str(building.name) + " at " + str(building.rect))
-            if building == previousBuilding:
-                building.rect.x -= Data.Building_Speed * tick / 1000.0
+        previousBuilding = Data.Buildings[0] # variable to compare previous building to new one
+        for building in Data.Buildings: #loop through all buildings
+            if building == Data.Buildings[0]: # if building is 1st building...
+                building.rect.x -= Data.Building_Speed * tick / 1000.0 # move building based off time
             else:
-                building.rect.x = previousBuilding.rect.x + previousBuilding.rect.width + previousBuilding.gap
-            previousBuilding = building
+                building.rect.x = previousBuilding.rect.x + previousBuilding.rect.width + previousBuilding.gap # reposition buildings based off the one before
+            previousBuilding = building # set current building to previous building
 
     def collision2() :
         for building in Data.Buildings:
@@ -294,19 +294,16 @@ def runGame():
     ############################################################
     background = Background('background.png', [0,0])
 
-    Data.Buildings = []
+    building = Building(0, 400, 1520, 600, BLACK) #hardcode first building with runway width
+    Data.Buildings.append(building)        
+    lastY = building.rect.y #for calculating if building height is too high to jump
+    for i in range(0,4):
+        lastBuilding = Data.Buildings[-1] #get last building we made     
+        startX = lastBuilding.rect.x + lastBuilding.rect.width + Random.Gap() #new X position is where last building starts 
 
-    lastY = 0
-    for i in range(0,5):
-        startX = 0
-        if len(Data.Buildings) > 0:
-            lastBuilding = Data.Buildings[-1]        
-            startX = lastBuilding.rect.x + lastBuilding.rect.width
 
-        building = Building(startX + Random.Gap(), Random.YPos(), Random.Width(), 600, BLACK) #creates the Buildings
-        #check building can be jumped to
-        if building.rect.y < lastY - Data.MaxBuildingHeightDifference:
-            building.rect.y = lastY - Data.MaxBuildingHeightDifference
+        building = Building(startX + Random.Gap(), Random.YPos(lastY - Data.MaxBuildingHeightDifference), Random.Width(), 600, BLACK) #creates the Buildings
+        #check if building can be jumped to
         lastY = building.rect.y
         building.name = i
         Data.Buildings.append(building)
@@ -315,30 +312,24 @@ def runGame():
 
 
     #robot = Robot(5,0,60,60,BLUE)
-    robot = Robot(5, lastBuilding.rect.y-60,60,60,BLUE)# spawns the robot on the first building roof 
+    robot = Robot(5, lastBuilding.rect.y-60,60,60,BLUE)
 
     robot_group = pygame.sprite.Group(robot)
+    clock.tick(60) # resets clock after restart
 
     while not Data.isGameOver:
         print("inside loop")
         
-
         tick = clock.tick(60) # gives time since last frame in ms
   
-
         calcBuildingsPos(tick) # calculate positions using tick to account for processing lag
-
         calcRobotPos(tick) # same as above
-
         collision2()
-        
-        
-        
                 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-            if Data.T < 0.0001 and event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE: #makes the robot jump
+            if Data.T < 0.0001 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
                 print("jump")
                 playSound("Jump.wav")
                 robot.Initial_Velocity = Data.Jump_Velocity
@@ -350,15 +341,11 @@ def runGame():
                 #pause the meter counter
                 #pause running animatoin
                 # show pause screen
-      
-       
-                
-                  
+                 
                 #pauseScreen stops and 
                 #animatoin continues
                 #meter counter continues
 
-                
         screen.fill(BLACK)
         screen.blit(background.image, background.rect)
 
@@ -377,9 +364,9 @@ def runGame():
                 
         pygame.display.flip()
 
-    # TODO : make sure buildings and everything resets properly
     building_group.empty()
     robot_group.empty()
+    Data.Buildings = []
 
 # Run loop(s)
 #################################################################    
@@ -388,12 +375,12 @@ playMusic("MortalMachine.ogg")
 
 running = True
 
-flicker = 0.0 # flicker? what is this 
+flicker = 0.0 # Counter for changing the start screen background
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
             pygame.quit()
-            sys.quit()
+            sys.quit() # This is causing an error : module 'sys' has no attribute 'quit'
             
         if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_r) :
             Data.isGameOver = False
