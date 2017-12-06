@@ -222,20 +222,20 @@ def runGame():
 
     def calcBuildingsPos(tick):
         # move first building to the back if it has gone offscreen
-        firstBuilding = Data.Buildings[0]
-        if firstBuilding.rect.x < -firstBuilding.rect.width:
+        firstBuilding = Data.Buildings[0] # retrieves the first building in a list
+        if firstBuilding.rect.x < -firstBuilding.rect.width: #if x position of building is its entire width offscreen...
             maxHeight = Data.Buildings[0].rect.y - Data.MaxBuildingHeightDifference
             firstBuilding.setup(800, Random.YPos(maxHeight), Random.Width(), 600)
-            firstBuilding.gap = Random.Gap()
+            firstBuilding.gap = Random.Gap() # ... set a new random gap
             rotate(Data.Buildings)  #moves rects to the back of the queue
 
-        previousBuilding = Data.Buildings[0]
-        for building in Data.Buildings:
-            if building == previousBuilding:
-                building.rect.x -= Data.Building_Speed * tick / 1000.0
+        previousBuilding = Data.Buildings[0] # variable to compare previous building to new one
+        for building in Data.Buildings: #loop through all buildings
+            if building == Data.Buildings[0]: # if building is 1st building...
+                building.rect.x -= Data.Building_Speed * tick / 1000.0 # move building based off time
             else:
-                building.rect.x = previousBuilding.rect.x + previousBuilding.rect.width + previousBuilding.gap
-            previousBuilding = building
+                building.rect.x = previousBuilding.rect.x + previousBuilding.rect.width + previousBuilding.gap # reposition buildings based off the one before
+            previousBuilding = building # set current building to previous building
 
     def collision2() :
         for building in Data.Buildings:
