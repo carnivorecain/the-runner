@@ -21,7 +21,8 @@ screen = pygame.display.set_mode((WIDTH,HEIGHT))
 
 pygame.display.set_caption('THAT WHICH RUNS DOES NOT FALL')
 
-clock = pygame.time.Clock()
+clock = pygame.time.Clock() # used to get ticks, which are then used for time between frames
+
 
 # Global Attributes 
 ##################################
@@ -32,8 +33,8 @@ class Data():
     pause = False
 
     Buildings = []
-    explosion_group = pygame.sprite.Group()
-    robotRect = pygame.Rect(0,0,0,0)
+    explosion_group = pygame.sprite.Group() # allows us to draw explosions
+    robotRect = pygame.Rect(0,0,0,0) #lets things outside the runGame function reference robot's position, currently just used for explosion
     
     robotYOrgin = 0 # JASON HERE 
     Y_Change = 0
@@ -47,20 +48,22 @@ class Data():
     Highscore = 0 
 
     MaxBuildingHeightDifference = 100
+
+
 #KEY FUNCTIONS
     ############################################################
 def rotate(lst): # rotates the buildings via a list
     lst[:] = lst[1:] + [lst[0]]
 
-def getImage(path): # the point of this is?
-    image = pygame.image.load(path)
-    return image
-    global _image_library
-    image = _image_library.get(path)
-    if image == None:
-            canonicalized_path = path.replace('/', os.sep).replace('\\', os.sep)
-            image = pygame.image.load(canonicalized_path)
-            _image_library[path] = image
+def getImage(path): #  loads images into local memory for easy reference, makes game run faster
+    image = pygame.image.load(path) 
+    return image # QUERY: once we return image, doesn't that make the rest of this function doesn't run?
+    global _image_library # makes a library for images
+    image = _image_library.get(path) # every time you try to call an image, it checks to see if it's in the library
+    if image == None: #if not, finds on disc and then puts it in the library
+            canonicalized_path = path.replace('/', os.sep).replace('\\', os.sep) # changing path so it can be used as a key in a dictionary
+            image = pygame.image.load(canonicalized_path) # loads image
+            _image_library[path] = image #saves image in dictionary
     return image
 
 def playSound(filename): # plays the sfx
@@ -95,7 +98,7 @@ class Background(pygame.sprite.Sprite): # class for Background image
         pygame.sprite.Sprite.__init__(self)  #call Sprite initializer
         self.image = pygame.image.load(image_file) # loading image
         self.rect = self.image.get_rect() # background rect
-        self.rect.left, self.rect.top = location # alignment? position?
+        self.rect.left, self.rect.top = location # setting the position Background image on screen
 
 class Text():
     def __init__(self, text, fnt, size, xcoord, ycoord,color):
@@ -106,11 +109,11 @@ class Text():
         self.ycoord = ycoord
         self.color = color
         
-    def text_objects(self,font): # making a space for text?
+    def text_objects(self,font): # making a space for text? makes a text object
         textSurface = font.render(self.text, True, self.color)
         return textSurface, textSurface.get_rect()
     
-    def Write(self):# assuming writing for text need to explain?
+    def Write(self):# assuming writing for text need to explain? shows on screen
         Texty = pygame.font.Font(self.fnt,self.size)
         TextSurf, TextRect = self.text_objects(Texty)
         TextRect.topright = ((self.xcoord,self.ycoord))
@@ -153,7 +156,7 @@ class Building(pygame.sprite.Sprite): # Class for building
 
 class Robot(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height): # standard construction of robot 
-        super().__init__()
+        super().__init__() # you want it to be created as a sprite, "super" calls the sprite initializer because Robot is a subclass of Sprite
         self.rect = pygame.Rect(x, y, width, height)
         self.Initial_Velocity = 0.0 
 
@@ -184,12 +187,12 @@ class Robot(pygame.sprite.Sprite):
         imageList = self.runImages
         if self.Initial_Velocity > 0 :
             imageList = self.jumpImages
-            # when you jump, you need to reset the index to 0 # 
+            # when you jump, you need to reset the index to 0 so jump animation starts at 1st frame "robot.index = 0" where we trigger jumps # 
         
         imageTicks = 5 # number of loops each animation frame shows for
-        self.index += 1
+        self.index += 1 # progresses animation
         if self.index >= len(imageList)*imageTicks:
-            self.index = 0
+            self.index = 0 # resets to beginning of animation so it can loop
         imageCount = int(self.index/imageTicks)
         self.image = imageList[imageCount]
 
@@ -201,7 +204,7 @@ class Robot(pygame.sprite.Sprite):
             showGameOver()
 
 class Explosion(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, height): # standard construction of robot 
+    def __init__(self, x, y, width, height):
         super().__init__()
         
         self.deathImages = [] # list for the explosion animation
@@ -283,9 +286,9 @@ def runGame():
         # move first building to the back if it has gone offscreen
         firstBuilding = Data.Buildings[0] # retrieves the first building in a list
         if firstBuilding.rect.x < -firstBuilding.rect.width: #if x position of building is its entire width offscreen...
-            maxHeight = Data.Buildings[0].rect.y - Data.MaxBuildingHeightDifference
-            firstBuilding.setup(800, Random.YPos(maxHeight), Random.Width(), 600)
-            firstBuilding.gap = Random.Gap() # ... set a new random gap
+            maxHeight = Data.Buildings[-1].rect.y - Data.MaxBuildingHeightDifference # ... repositions building being moved to back of queue
+            firstBuilding.setup(800, Random.YPos(maxHeight), Random.Width(), 600) # sets new building parameters
+            firstBuilding.gap = Random.Gap() # set a new random gap
             rotate(Data.Buildings)  #moves rects to the back of the queue
 
         previousBuilding = Data.Buildings[0] # variable to compare previous building to new one
