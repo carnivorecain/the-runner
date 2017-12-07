@@ -28,7 +28,7 @@ clock = pygame.time.Clock() # used to get ticks, which are then used for time be
 ##################################
 
 class Data():
-    currentScreen = 0 # 0 is Start Screen, 1 is Playing, 2 is Game Over, 3 is Paused (Move paused to StartGame?)
+    currentScreen = 0 # 0 is Start Screen, 1 is Playing, 2 is Game Over
     isGameOver = False
     pause = False
 
@@ -50,31 +50,15 @@ class Data():
     crashAllowance = 15
     MaxBuildingHeightDifference = ((-Jump_Velocity*Jump_Velocity)/(2*Gravity)) - 10
 
-print(Data.MaxBuildingHeightDifference)
-#KEY FUNCTIONS
-    ############################################################
-def rotate(lst): # rotates the buildings via a list
-    lst[:] = lst[1:] + [lst[0]]
-
-def getImage(path): #  loads images into local memory for easy reference, makes game run faster
-    image = pygame.image.load(path) 
-    return image # QUERY: once we return image, doesn't that make the rest of this function doesn't run?
-    global _image_library # makes a library for images
-    image = _image_library.get(path) # every time you try to call an image, it checks to see if it's in the library
-    if image == None: #if not, finds on disc and then puts it in the library
-            canonicalized_path = path.replace('/', os.sep).replace('\\', os.sep) # changing path so it can be used as a key in a dictionary
-            image = pygame.image.load(canonicalized_path) # loads image
-            _image_library[path] = image #saves image in dictionary
-    return image
-
-def playSound(filename): # plays the sfx
-    soundObj = pygame.mixer.Sound(filename)
-    soundObj.play()
-
-def playMusic(filename): # plays the music soundtrack
-    pygame.mixer.music.load(filename)
-    pygame.mixer.music.play()
+#print(Data.MaxBuildingHeightDifference)
     
+
+    
+
+            
+# OUR CLASSES AND METHODS
+############################################################
+
 class Random(): # randomixer for building proportions
     def Height():
         return random.randint(1,6)*45 # may want to adjust numbers as there are times can't make the jump
@@ -90,9 +74,6 @@ class Random(): # randomixer for building proportions
         if newPos < MaxHeight:
             newPos = MaxHeight
         return newPos
-            
-# Visible Objects
-############################################################
 
 class Background(pygame.sprite.Sprite): # class for Background image
     def __init__(self, image_file, location):
@@ -151,9 +132,7 @@ class Building(pygame.sprite.Sprite): # Class for building
     def CrashRect(self): # rectangle for collisions 
         return pygame.Rect(self.rect.x, self.rect.y+Data.crashAllowance, 10 ,self.rect.height-Data.crashAllowance)
 
-    # debug visualisation
-    # def ShowCrashRect(self):
-    #     pygame.draw.rect(screen,BLACK,self.CrashRect())
+    
 
 class Robot(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height): # standard construction of robot 
@@ -235,6 +214,31 @@ class Explosion(pygame.sprite.Sprite):
         imageCount = int(self.index/imageTicks)
         self.image = imageList[imageCount]       
 
+#KEY FUNCTIONS
+    ############################################################
+def rotate(lst): # rotates the buildings via a list
+    lst[:] = lst[1:] + [lst[0]]
+
+def getImage(path): #  loads images into local memory for easy reference, makes game run faster
+    image = pygame.image.load(path) 
+    return image # QUERY: once we return image, doesn't that make the rest of this function doesn't run?
+    global _image_library # makes a library for images
+    image = _image_library.get(path) # every time you try to call an image, it checks to see if it's in the library
+    if image == None: #if not, finds on disc and then puts it in the library
+            canonicalized_path = path.replace('/', os.sep).replace('\\', os.sep) # changing path so it can be used as a key in a dictionary
+            image = pygame.image.load(canonicalized_path) # loads image
+            _image_library[path] = image #saves image in dictionary
+    return image
+
+def playSound(filename): # plays the sfx
+    soundObj = pygame.mixer.Sound(filename)
+    soundObj.play()
+
+def playMusic(filename): # plays the music soundtrack
+    pygame.mixer.music.load(filename)
+    pygame.mixer.music.play()
+
+
 def showExplosion():
     #add sound effect
     if len(Data.explosion_group) < 1:
@@ -251,26 +255,38 @@ def showGameOver(): # sprites for death and stops map
 
 def resetVariables():# no touch
     running = True
+    Data.Building = []
+    Data.pause = False
     Data.Building_Speed = 600.0
     Data.Metres = 0
     Data.Robot_Y_Origin = 0 # dont touch
     Data.T = 0
     Data.explosion_group.empty()
+    runGame()# running a test here 
 
 def showPause(): 
     print("Pause")
     pauseFlickerCounter = 0.0 # Counter for changing the pause screen background
 
-    while Data.pause == True:
+    while Data.pause == True: # pause loop 
         print("in pause loop")
         for event in pygame.event.get(): # check for user input
-            if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE or event.key == pygame.K_p):
-                print("break pause loop back to game")
+            if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or
+                                                 event.key == pygame.K_ESCAPE or
+                                                 event.key == pygame.K_p): # to continue from pause
+                #print("break pause loop back to game")
                 Data.pause = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_r: # to restart run currently it does restart map but will play
+                pause = False # all the buildings in list before hand 
+                Data.Building=[] # hoped this would clear the list but it does not 
+                Data.isGameOver = False
+                resetVariables()
+                #runGame()
+                
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 print("quit from pause loop")
                 pygame.quit()
-                sys.quit()
+                
 
         # flicker pause screen background
         pauseFlickerCounter += clock.tick(60)
@@ -284,19 +300,13 @@ def showPause():
         screen.blit(startScreen.image, startScreen.rect)
         pygame.display.flip()
 
-
-def runGame():
-    #resetVariables() not needed here it is in the reset loop 
-    
-
-    # calculation functions
+# calculation functions
     ############################################################
 
-
-    def calcBuildingsPos(tick):
+def calcBuildingsPos(tick):
         Data.Building_Speed *= 1.000005 ** tick # increase building speed so you move faster the longer the game goes on.
-        print("b" + str(Data.Building_Speed))
-        # move first building to the back if it has gone offscreen
+        #print("b" + str(Data.Building_Speed))
+        
         firstBuilding = Data.Buildings[0] # retrieves the first building in a list
         if firstBuilding.rect.x < -firstBuilding.rect.width: #if x position of building is its entire width offscreen...
             maxHeight = Data.Buildings[-1].rect.y - Data.MaxBuildingHeightDifference # ... repositions building being moved to back of queue
@@ -312,19 +322,23 @@ def runGame():
                 building.rect.x = previousBuilding.rect.x + previousBuilding.rect.width + previousBuilding.gap # reposition buildings based off the one before
             previousBuilding = building # set current building to previous building
 
+
+
+def runGame():
+    #resetVariables() not needed here it is in the reset loop 
+
+  # functions that require robot object to be in existence
     def collision2() :
         for building in Data.Buildings:
             if robot.rect.colliderect(building.CrashRect()) :        
                 print("hits wall game over")
                 robot.rect.x = building.rect.x - building.tileWidth #shouldn't this be robot width?
                 Data.Building_Speed = 0.0
-                    # death animation must delete robot
-                    #and also run showgameover then does the gameover
-                #showGameOver()
+                    
                 showExplosion()
             elif robot.rect.colliderect(building.rect) and robot.rect.y and len(Data.explosion_group) < 1:
                 #print("collision with building " + str(building.name))
-                Data.Robot_Y_Origin = building.rect.y-robot.rect.height ########################
+                Data.Robot_Y_Origin = building.rect.y-robot.rect.height 
                 robot.rect.y = Data.Robot_Y_Origin
                 Data.T = 0
                 robot.Initial_Velocity = 0
@@ -334,7 +348,7 @@ def runGame():
         #print(Data.T)
         #print(Data.robotYOrgin)
         
-        #robotYOrig = robot.rect.y  # makes variable for robot intial Y postion per tick  # JASON CHANGES EQUATION 
+        #robotYOrig = robot.rect.y  # makes variable for robot intial Y postion per tick 
         Data.Y_Change = (robot.Initial_Velocity*Data.T) + ((Data.Gravity*Data.T*Data.T)/2)
         # print("Data T:" + str(Data.T) + ", y-change:" + str(Data.Y_Change))
         robot.rect.y = Data.Robot_Y_Origin - Data.Y_Change
@@ -353,30 +367,29 @@ def runGame():
     background = Background('background.png', [0,0])
 
     building = Building(0, 400, 1520, 600) #hardcode first building with runway width
-    Data.Buildings.append(building)        
+    Data.Buildings.append(building) # adds first builidng to the buildings list        
     lastY = building.rect.y #for calculating if building height is too high to jump
     for i in range(0,4):
         lastBuilding = Data.Buildings[-1] #get last building we made     
-        startX = lastBuilding.rect.x + lastBuilding.rect.width + Random.Gap() #new X position is where last building starts 
-
-
+        startX = lastBuilding.rect.x + lastBuilding.rect.width + Random.Gap() #new X position is where last building starts
+        
         building = Building(startX + Random.Gap(), Random.YPos(lastY - Data.MaxBuildingHeightDifference), Random.Width(), 600) #creates the Buildings
         #check if building can be jumped to
         lastY = building.rect.y
         building.name = i
         Data.Buildings.append(building)
 
-    building_group = pygame.sprite.Group(Data.Buildings)
+    building_group = pygame.sprite.Group(Data.Buildings) # we should try putting all the sprite groups here or all in their respective class
+    #explosion_group = pygame.sprite.Group() # to work here make sure all data.explosion_group --> explosion_group
 
 
-    #robot = Robot(5,0,60,60)
-    robot = Robot(5, lastBuilding.rect.y-60,60,60)
+    robot = Robot(5,lastBuilding.rect.y-60,60,60)
 
     robot_group = pygame.sprite.Group(robot)
     clock.tick(60) # resets clock after restart
 
     while not Data.isGameOver:
-        #print("inside loop")
+        #print("inside gameover loop")
         
         if not Data.pause: # don't run game code if we're paused
             tick = clock.tick(60) # gives time since last frame in ms
@@ -389,28 +402,20 @@ def runGame():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                 if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
-                    print("jump")
+                    #print("jump")
                     playSound("Jump.wav")
                     robot.Initial_Velocity = Data.Jump_Velocity
                     
                 if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT: #makes the robot jump
-                    print("jump")
+                    #print("jump")
                     playSound("Jump.wav")
                     robot.Initial_Velocity = 400
                     
                 if event.type == pygame.KEYDOWN and (event.key == pygame.K_p or event.key == pygame.K_ESCAPE):
                     Data.pause = True
-                    print("pause")
-     #               Data.tt = Data.T
+                    #print("pause")
                     showPause()  
-                    #Data.currentScreen = 3 ?? maybe its not working as intended 
-                    #pause the meter counter
-                    #pause running animatoin
-                    # show pause screen
-                     
-                    #pauseScreen stops and 
-                    #animatoin continues
-                    #meter counter continues
+                    
 
             screen.fill(BLACK)
             screen.blit(background.image, background.rect)
@@ -445,27 +450,19 @@ playMusic("MortalMachine.ogg")
 running = True
 
 startFlickerCounter = 0.0 # Counter for changing the start screen background
-while running:
+while running: # the main game loop 
     startFlickerCounter += clock.tick(60) # gives time since last frame in ms
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
             pygame.quit()
-            sys.quit() # This is causing an error : module 'sys' has no attribute 'quit'
+            sys.quit # This is causing an error : module 'sys' has no attribute 'quit'
             
         if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_r) :
             Data.isGameOver = False
             resetVariables()
             runGame()
             
-        while Data.pause == True:
-            if event.type == pygame.KEYDOWN and (event.key == pygame.K_p or event.key == pygame.K_ESCAPE):
-                Data.pause = False   
-                #pauseScreen stops and 
-                #animatoin continues
-                #meter counter continues
-            
-            # Data.currentScreen = 1
 
     if Data.currentScreen == 0: # flicker start screen background
         backgroundImage = 'Start_1.png'
@@ -487,17 +484,10 @@ while running:
         startScreen = Background(backgroundImage, [0,0])
         screen.fill(BLACK)
         screen.blit(startScreen.image, startScreen.rect)
-        # gameover = Text("Game Over. Q to quit R to restart",'freesansbold.ttf',30,600,300,BLACK)
-        # gameover.Write()
         pygame.display.flip()
         
-    elif Data.currentScreen == 3: # I don't think this ever gets called
-        print("OMG THIS CODE DOES GET CALLED! OMG THIS CODE DOES GET CALLED! OMG THIS CODE DOES GET CALLED! OMG THIS CODE DOES GET CALLED! OMG THIS CODE DOES GET CALLED!")
-        screen.fill(WHITE)
-        pausescreen = Text("Paused. Q to quit or P to continue",'freesansbold.ttf',30,600,300,BLACK)
-        pausescreen.Write()
-        pygame.display.flip()
+   
 
 pygame.quit()
+sys.quit()
 
-# gameover = Text("Game Over. Q to quit R to restart",'freesansbold.ttf',30,400,300,BLACK)
