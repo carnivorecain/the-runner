@@ -2,6 +2,7 @@ import pygame
 import math
 import random
 import sys
+import os
 from pygame.locals import *
 
 WIDTH = 800
@@ -13,6 +14,7 @@ RED   = (255,   0,   0)
 GREEN = (  0, 255,   0)
 BLUE  = (  0,   0, 255)
 
+_image_library = {}
 pygame.mixer.pre_init(44100, -16, 2, 2048) # connects audio
 pygame.init()
 pygame.font.init
@@ -56,9 +58,8 @@ print(Data.MaxBuildingHeightDifference)
 def rotate(lst): # rotates the buildings via a list
     lst[:] = lst[1:] + [lst[0]]
 
+# taken from http://www.nerdparadise.com/programming/pygame/part2
 def getImage(path): #  loads images into local memory for easy reference, makes game run faster
-    image = pygame.image.load(path) 
-    return image # QUERY: once we return image, doesn't that make the rest of this function doesn't run?
     global _image_library # makes a library for images
     image = _image_library.get(path) # every time you try to call an image, it checks to see if it's in the library
     if image == None: #if not, finds on disc and then puts it in the library
@@ -73,7 +74,7 @@ def playSound(filename): # plays the sfx
 
 def playMusic(filename): # plays the music soundtrack
     pygame.mixer.music.load(filename)
-    pygame.mixer.music.play()
+    pygame.mixer.music.play(-1) # -1 makes it loop
     
 class Random(): # randomixer for building proportions
     def Height():
