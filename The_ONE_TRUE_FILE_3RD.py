@@ -257,31 +257,31 @@ def resetVariables():# no touch
     Data.T = 0
     Data.explosion_group.empty()
 
-def showPause():
-    
+def showPause():    
     print("Pause")
-    Data.Building_Speed=0
-    #screen.fill(WHITE)
-    pausescreen = Text("Paused. Q to quit or SPACE to continue",'freesansbold.ttf',30,600,300,BLACK)
-    pausescreen.Write()
-    pygame.display.flip()
+    pauseFlickerCounter = 0.0 # Counter for changing the pause screen background
+
     while Data.pause == True:
+        print("in pause loop")
+        pauseFlickerCounter += clock.tick(60) # gives time since last frame in ms
+        backgroundImage = 'paused_1.png'
+        if pauseFlickerCounter > 1000:
+            backgroundImage = 'paused_2.png'
+        if pauseFlickerCounter > 2000:
+            pauseFlickerCounter = 0
+        startScreen = Background(backgroundImage, [0,0])
+        screen.fill(BLACK)
+        screen.blit(startScreen.image, startScreen.rect)
+        pygame.display.flip()
         for event in pygame.event.get():
-            print("in pause loop")
-            #print(Data.tt)
-            #print(Data.T)
-            pygame.display.flip()
-            if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE):
+            if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE or event.key == pygame.K_p):
                 print("break pause loop back to game")
                 Data.pause = False
- #               Data.T = Data.tt
-                #print (Data.T)
-                Data.Building_Speed =600
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 print("quit from pause loop")
                 pygame.quit()
                 sys.quit()
-                  
+
 def runGame():
     #resetVariables() not needed here it is in the reset loop 
     
@@ -313,7 +313,6 @@ def runGame():
                 print("hits wall game over")
                 robot.rect.x = building.rect.x - building.tileWidth
                 Data.Building_Speed = 0
-                # death animation
                     # death animation must delete robot
                     #and also run showgameover then does the gameover
                 #showGameOver()
@@ -374,48 +373,50 @@ def runGame():
     while not Data.isGameOver:
         #print("inside loop")
         
-        tick = clock.tick(60) # gives time since last frame in ms
-  
-        calcBuildingsPos(tick) # calculate positions using tick to account for processing lag
-        calcRobotPos(tick) # same as above
-        collision2()
-                
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
-                print("jump")
-                playSound("Jump.wav")
-                robot.Initial_Velocity = Data.Jump_Velocity
-                
-            if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT: #makes the robot jump
-                print("jump")
-                playSound("Jump.wav")
-                robot.Initial_Velocity = 400
-                
-            if event.type == pygame.KEYDOWN and (event.key == pygame.K_p or event.key == pygame.K_ESCAPE):
-                Data.pause = True
-                print("pause")
- #               Data.tt = Data.T
-                showPause()  
-                #Data.currentScreen = 3 ?? maybe its not working as intended 
-                #pause the meter counter
-                #pause running animatoin
-                # show pause screen
-                 
-                #pauseScreen stops and 
-                #animatoin continues
-                #meter counter continues
+        if not Data.pause:
+            tick = clock.tick(60) # gives time since last frame in ms
+      
+            calcBuildingsPos(tick) # calculate positions using tick to account for processing lag
+            calcRobotPos(tick) # same as above
+            collision2()
+                    
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
+                    print("jump")
+                    playSound("Jump.wav")
+                    robot.Initial_Velocity = Data.Jump_Velocity
+                    
+                if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT: #makes the robot jump
+                    print("jump")
+                    playSound("Jump.wav")
+                    robot.Initial_Velocity = 400
+                    
+                if event.type == pygame.KEYDOWN and (event.key == pygame.K_p or event.key == pygame.K_ESCAPE):
+                    Data.pause = True
+                    print("pause")
+     #               Data.tt = Data.T
+                    showPause()  
+                    #Data.currentScreen = 3 ?? maybe its not working as intended 
+                    #pause the meter counter
+                    #pause running animatoin
+                    # show pause screen
+                     
+                    #pauseScreen stops and 
+                    #animatoin continues
+                    #meter counter continues
 
-        screen.fill(BLACK)
-        screen.blit(background.image, background.rect)
+            screen.fill(BLACK)
+            screen.blit(background.image, background.rect)
 
-        
-        building_group.update()
+            
+            building_group.update()
+            robot_group.update()
+            Data.explosion_group.update()
+
         building_group.draw(screen)
-        robot_group.update()
         robot_group.draw(screen)
-        Data.explosion_group.update()
         Data.explosion_group.draw(screen)
         
         Data.Metres += 1 # score section
@@ -438,8 +439,10 @@ playMusic("MortalMachine.ogg")
 
 running = True
 
-flicker = 0.0 # Counter for changing the start screen background
+startFlickerCounter = 0.0 # Counter for changing the start screen background
 while running:
+    startFlickerCounter += clock.tick(60) # gives time since last frame in ms
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_q):
             pygame.quit()
@@ -460,24 +463,31 @@ while running:
             # Data.currentScreen = 1
 
     if Data.currentScreen == 0:
-        flicker += clock.tick(60) # gives time since last frame in ms
         backgroundImage = 'Start_1.png'
-        if flicker > 1000:
+        if startFlickerCounter > 1000:
             backgroundImage = 'Start_2.png'
-        if flicker > 2000:
-            flicker = 0
+        if startFlickerCounter > 2000:
+            startFlickerCounter = 0
         startScreen = Background(backgroundImage, [0,0])
         screen.fill(BLACK)
         screen.blit(startScreen.image, startScreen.rect)
         pygame.display.flip()
 
     elif Data.currentScreen == 2:
-        screen.fill(WHITE)
-        gameover = Text("Game Over. Q to quit R to restart",'freesansbold.ttf',30,600,300,BLACK)
-        gameover.Write()
+        backgroundImage = 'gameover_1.png'
+        if startFlickerCounter > 1000:
+            backgroundImage = 'gameover_2.png'
+        if startFlickerCounter > 2000:
+            startFlickerCounter = 0
+        startScreen = Background(backgroundImage, [0,0])
+        screen.fill(BLACK)
+        screen.blit(startScreen.image, startScreen.rect)
+        # gameover = Text("Game Over. Q to quit R to restart",'freesansbold.ttf',30,600,300,BLACK)
+        # gameover.Write()
         pygame.display.flip()
         
-    elif Data.currentScreen == 3:
+    elif Data.currentScreen == 3: # I don't think this ever gets called
+        print("OMG THIS CODE DOES GET CALLED! OMG THIS CODE DOES GET CALLED! OMG THIS CODE DOES GET CALLED! OMG THIS CODE DOES GET CALLED! OMG THIS CODE DOES GET CALLED!")
         screen.fill(WHITE)
         pausescreen = Text("Paused. Q to quit or P to continue",'freesansbold.ttf',30,600,300,BLACK)
         pausescreen.Write()
