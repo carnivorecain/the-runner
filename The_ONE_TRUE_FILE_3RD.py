@@ -43,7 +43,7 @@ class Data():
     
     T = 0
     Metres = 0
-    Building_Speed = 0
+    Building_Speed = 0.0
     Gravity = -2000
     Highscore = 0
 
@@ -251,19 +251,29 @@ def showGameOver(): # sprites for death and stops map
 
 def resetVariables():# no touch
     running = True
-    Data.Building_Speed = 600
+    Data.Building_Speed = 600.0
     Data.Metres = 0
     Data.Robot_Y_Origin = 0 # dont touch
     Data.T = 0
     Data.explosion_group.empty()
 
-def showPause():    
+def showPause(): 
     print("Pause")
     pauseFlickerCounter = 0.0 # Counter for changing the pause screen background
 
     while Data.pause == True:
         print("in pause loop")
-        pauseFlickerCounter += clock.tick(60) # gives time since last frame in ms
+        for event in pygame.event.get(): # check for user input
+            if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE or event.key == pygame.K_p):
+                print("break pause loop back to game")
+                Data.pause = False
+            elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                print("quit from pause loop")
+                pygame.quit()
+                sys.quit()
+
+        # flicker pause screen background
+        pauseFlickerCounter += clock.tick(60)
         backgroundImage = 'paused_1.png'
         if pauseFlickerCounter > 1000:
             backgroundImage = 'paused_2.png'
@@ -273,14 +283,7 @@ def showPause():
         screen.fill(BLACK)
         screen.blit(startScreen.image, startScreen.rect)
         pygame.display.flip()
-        for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE or event.key == pygame.K_p):
-                print("break pause loop back to game")
-                Data.pause = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
-                print("quit from pause loop")
-                pygame.quit()
-                sys.quit()
+
 
 def runGame():
     #resetVariables() not needed here it is in the reset loop 
@@ -291,6 +294,8 @@ def runGame():
 
 
     def calcBuildingsPos(tick):
+        Data.Building_Speed *= 1.000005 ** tick # increase building speed so you move faster the longer the game goes on.
+        print("b" + str(Data.Building_Speed))
         # move first building to the back if it has gone offscreen
         firstBuilding = Data.Buildings[0] # retrieves the first building in a list
         if firstBuilding.rect.x < -firstBuilding.rect.width: #if x position of building is its entire width offscreen...
@@ -311,13 +316,13 @@ def runGame():
         for building in Data.Buildings:
             if robot.rect.colliderect(building.CrashRect()) :        
                 print("hits wall game over")
-                robot.rect.x = building.rect.x - building.tileWidth
-                Data.Building_Speed = 0
+                robot.rect.x = building.rect.x - building.tileWidth #shouldn't this be robot width?
+                Data.Building_Speed = 0.0
                     # death animation must delete robot
                     #and also run showgameover then does the gameover
                 #showGameOver()
                 showExplosion()
-            elif robot.rect.colliderect(building.rect) and robot.rect.y:
+            elif robot.rect.colliderect(building.rect) and robot.rect.y and len(Data.explosion_group) < 1:
                 #print("collision with building " + str(building.name))
                 Data.Robot_Y_Origin = building.rect.y-robot.rect.height ########################
                 robot.rect.y = Data.Robot_Y_Origin
@@ -373,7 +378,7 @@ def runGame():
     while not Data.isGameOver:
         #print("inside loop")
         
-        if not Data.pause:
+        if not Data.pause: # don't run game code if we're paused
             tick = clock.tick(60) # gives time since last frame in ms
       
             calcBuildingsPos(tick) # calculate positions using tick to account for processing lag
@@ -410,6 +415,7 @@ def runGame():
             screen.fill(BLACK)
             screen.blit(background.image, background.rect)
 
+            Data.Metres += 1 # update score
             
             building_group.update()
             robot_group.update()
@@ -419,8 +425,7 @@ def runGame():
         robot_group.draw(screen)
         Data.explosion_group.draw(screen)
         
-        Data.Metres += 1 # score section
-        if Data.Highscore < Data.Metres :
+        if Data.Highscore < Data.Metres :# score section
             Data.Highscore = Data.Metres
         Score = Text("Highscore: " + str(Data.Highscore) + "m  / "+"Current Run: " +
                      str(Data.Metres) + "m",'freesansbold.ttf',30,750,50,WHITE)  #prints the score on the screen
@@ -462,7 +467,7 @@ while running:
             
             # Data.currentScreen = 1
 
-    if Data.currentScreen == 0:
+    if Data.currentScreen == 0: # flicker start screen background
         backgroundImage = 'Start_1.png'
         if startFlickerCounter > 1000:
             backgroundImage = 'Start_2.png'
@@ -473,7 +478,7 @@ while running:
         screen.blit(startScreen.image, startScreen.rect)
         pygame.display.flip()
 
-    elif Data.currentScreen == 2:
+    elif Data.currentScreen == 2: # flicker game over screen background
         backgroundImage = 'gameover_1.png'
         if startFlickerCounter > 1000:
             backgroundImage = 'gameover_2.png'
