@@ -36,20 +36,20 @@ class Data():
     explosion_group = pygame.sprite.Group() # allows us to draw explosions
     robotRect = pygame.Rect(0,0,0,0) #lets things outside the runGame function reference robot's position, currently just used for explosion
     
-    robotYOrgin = 0 # JASON HERE 
+    Robot_Y_Origin = 0 # JASON HERE 
     Y_Change = 0
     time = 0
-    Jump_Velocity = 25
+    Jump_Velocity = 800
     
     T = 0
     Metres = 0
-    Building_Speed = 600
-    Gravity = -75
-    Highscore = 0 
+    Building_Speed = 0
+    Gravity = -1000
+    Highscore = 0
 
-    MaxBuildingHeightDifference = 100
+    MaxBuildingHeightDifference = ((-Jump_Velocity*Jump_Velocity)/(2*Gravity)) - 10
 
-
+print(Data.MaxBuildingHeightDifference)
 #KEY FUNCTIONS
     ############################################################
 def rotate(lst): # rotates the buildings via a list
@@ -250,24 +250,29 @@ def resetVariables():# no touch
     running = True
     Data.Building_Speed = 600
     Data.Metres = 0
-    Data.robotYOrign = 0 # dont touch
+    Data.Robot_Y_Origin = 0 # dont touch
+    Data.T = 0
     Data.explosion_group.empty()
 
 def showPause():
     
     print("Pause")
     Data.Building_Speed=0
-    screen.fill(WHITE)
+    #screen.fill(WHITE)
     pausescreen = Text("Paused. Q to quit or SPACE to continue",'freesansbold.ttf',30,600,300,BLACK)
     pausescreen.Write()
     pygame.display.flip()
-
     while Data.pause == True:
         for event in pygame.event.get():
             print("in pause loop")
+            #print(Data.tt)
+            #print(Data.T)
+            pygame.display.flip()
             if event.type == pygame.KEYDOWN and (event.key == pygame.K_SPACE or event.key == pygame.K_ESCAPE):
                 print("break pause loop back to game")
                 Data.pause = False
+ #               Data.T = Data.tt
+                #print (Data.T)
                 Data.Building_Speed =600
             elif event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 print("quit from pause loop")
@@ -311,20 +316,24 @@ def runGame():
                 #showGameOver()
                 showExplosion()
             elif robot.rect.colliderect(building.rect) and robot.rect.y:
-                print("collision with building " + str(building.name))
-                Data.robotYOrgin = robot.rect.y ########################
-                robot.rect.y = building.rect.y-robot.rect.height
+                #print("collision with building " + str(building.name))
+                Data.Robot_Y_Origin = building.rect.y-robot.rect.height ########################
+                robot.rect.y = Data.Robot_Y_Origin
                 Data.T = 0
                 robot.Initial_Velocity = 0
 
     def calcRobotPos(tick):
         Data.T += tick / 1000.0
-        print(Data.robotYOrgin)
+        #print(Data.T)
+        #print(Data.robotYOrgin)
+        
         #robotYOrig = robot.rect.y  # makes variable for robot intial Y postion per tick  # JASON CHANGES EQUATION 
-        Data.Y_Change = (robot.Initial_Velocity) + (Data.Gravity*Data.T)
+        Data.Y_Change = (robot.Initial_Velocity*Data.T) + ((Data.Gravity*Data.T*Data.T)/2)
         # print("Data T:" + str(Data.T) + ", y-change:" + str(Data.Y_Change))
-        robot.rect.y -= Data.Y_Change
+        robot.rect.y = Data.Robot_Y_Origin - Data.Y_Change
         Data.robotRect = robot.rect
+        #print(robot.rect.y)
+        #print(Data.T)
         # print("Robot:" + str(robot.rect.y))
 
 
@@ -360,7 +369,7 @@ def runGame():
     clock.tick(60) # resets clock after restart
 
     while not Data.isGameOver:
-        print("inside loop")
+        #print("inside loop")
         
         tick = clock.tick(60) # gives time since last frame in ms
   
@@ -371,13 +380,20 @@ def runGame():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-            if Data.T < 0.0001 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
+            if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_UP: #makes the robot jump
                 print("jump")
                 playSound("Jump.wav")
                 robot.Initial_Velocity = Data.Jump_Velocity
+                
+            if Data.T < 0.1 and event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT: #makes the robot jump
+                print("jump")
+                playSound("Jump.wav")
+                robot.Initial_Velocity = 400
+                
             if event.type == pygame.KEYDOWN and (event.key == pygame.K_p or event.key == pygame.K_ESCAPE):
                 Data.pause = True
                 print("pause")
+ #               Data.tt = Data.T
                 showPause()  
                 #Data.currentScreen = 3 ?? maybe its not working as intended 
                 #pause the meter counter
