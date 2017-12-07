@@ -31,19 +31,23 @@ https://www.newgrounds.com/audio/listen/735541
 "Spin Jump" by Brandino480 / soundbible.com / Public Domain
 http://soundbible.com/1898-Spin-Jump.html
 
+"Explosion, metal debris" by Blastwave FX / ZapSplat / Standard License
+https://www.zapsplat.com/music/explosion-metal-debris/
+
+
 
 REFERENCES
 
-General PyGame Tutorial
+General PyGame tutorial
 http://www.nerdparadise.com/programming/pygame
 
-Display Text
+Display text
 https://pythonprogramming.net/displaying-text-pygame-screen/
 
 Moving a sprite
 https://stackoverflow.com/questions/16183265/how-to-move-sprite-in-pygame
 
-Sprite Group management
+Sprite group management
 https://stackoverflow.com/questions/20065430/how-to-delete-rects-sprites-with-python-and-pygame
 https://stackoverflow.com/questions/40632424/pygame-remove-a-single-sprite-from-a-group
 
