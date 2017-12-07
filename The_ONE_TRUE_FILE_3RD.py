@@ -238,6 +238,7 @@ class Explosion(pygame.sprite.Sprite):
 def showExplosion():
     #add sound effect
     if len(Data.explosion_group) < 1:
+        playSound("explosion.wav")
         explosion = Explosion(Data.robotRect.x, Data.robotRect.y, Data.robotRect.width, Data.robotRect.height)
         Data.explosion_group = pygame.sprite.Group(explosion)
     
