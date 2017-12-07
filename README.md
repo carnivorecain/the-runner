@@ -34,6 +34,9 @@ http://soundbible.com/1898-Spin-Jump.html
 
 REFERENCES
 
+General PyGame Tutorial
+http://www.nerdparadise.com/programming/pygame
+
 Display Text
 https://pythonprogramming.net/displaying-text-pygame-screen/
 
