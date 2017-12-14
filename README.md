@@ -1,19 +1,5 @@
 # the-runner
 
-
-
-
-""8""               8"""8                                
-  8   e   e eeee    8   8  e   e eeeee eeeee eeee eeeee  
-  8e  8   8 8       8eee8e 8   8 8   8 8   8 8    8   8  
-  88  8eee8 8eee    88   8 8e  8 8e  8 8e  8 8eee 8eee8e 
-  88  88  8 88      88   8 88  8 88  8 88  8 88   88   8 
-  88  88  8 88ee    88   8 88ee8 88  8 88  8 88ee 88   8 
-                                                         
-                                    
-                                                                                            
-
-
 ********************* HOW TO INSTALL *********************
 
 SYSTEM REQUIREMENTS
