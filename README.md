@@ -1,6 +1,6 @@
 # the-runner
 
-********************* HOW TO INSTALL *********************
+*********************************** HOW TO INSTALL ***********************************
 
 SYSTEM REQUIREMENTS
 
@@ -20,7 +20,23 @@ RUNNING THE GAME
 
 3. Enjoy!
 
-********************* CREDITS *********************
+
+********************************** HOW TO PLAY ***********************************
+
+You are the robot. Time your jumps to avoid crashing into the buildings!
+
+Jump - ↑
+
+Start - Space
+
+Pause/Unpause - P or Esc
+
+Restart - R
+
+Quit - Q
+
+
+*********************************** CREDITS ***********************************
 
 DESIGN & PROGRAMMING
 
