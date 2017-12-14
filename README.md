@@ -83,3 +83,12 @@ https://stackoverflow.com/questions/40632424/pygame-remove-a-single-sprite-from-
 Sprite image tiling
 https://stackoverflow.com/questions/16280608/pygame-how-to-tile-subsurfaces-on-an-image
 https://stackoverflow.com/questions/35333669/how-can-i-use-tiling-in-a-game-with-python-and-pygame
+
+currentScreen
+https://stackoverflow.com/questions/20431501/pygame-game-over-screen
+
+Collisions
+https://www.pygame.org/docs/ref/rect.html#pygame.Rect.colliderect
+
+Pushing keys
+https://www.pygame.org/docs/ref/key.html
