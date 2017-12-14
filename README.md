@@ -26,9 +26,13 @@ RUNNING THE GAME
 You are the robot. Time your jumps to avoid crashing into the buildings!
 
 Jump - ↑
+
 Start - Space
+
 Pause/Unpause - P or Esc
+
 Restart - R
+
 Quit - Q
 
 *** CREDITS ***
