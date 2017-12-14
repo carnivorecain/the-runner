@@ -1,13 +1,37 @@
 # the-runner
-student game project for intro to programming class
 
-HOW TO INSTALL
+*** HOW TO INSTALL ***
+
+SYSTEM REQUIREMENTS
+
+Windows, MacOS, or Linux
+
+Python 3.6.0 or newer
+
+IDLE (Integrated Development and Learning Environment)
+
+PyGame
+
+RUNNING THE GAME
+
+1. Open TheRunner.py
+
+2. Run code through shell in IDLE
+
+3. Enjoy!
 
 
-HOW TO PLAY
+*** HOW TO PLAY ***
 
+You are the robot. Time your jumps to avoid crashing into the buildings!
 
-CREDITS
+Jump - ↑
+Start - Space
+Pause/Unpause - P or Esc
+Restart - R
+Quit - Q
+
+*** CREDITS ***
 
 DESIGN & PROGRAMMING
 
